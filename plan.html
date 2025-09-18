@@ -82,6 +82,17 @@
             overflow-y: auto;
             width: 60rem;
         }
+        .img-placeholder {
+            background-color: #f3f4f6;
+            border: 2px dashed #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            min-height: 200px;
+            text-align: center;
+            padding: 1rem;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -206,7 +217,7 @@
     <div id="guide-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold">Guía Visual de Pierna y Core</h2>
+                <h2 id="guide-title" class="text-2xl font-bold"></h2>
                 <button id="close-guide-btn" class="text-2xl font-bold">&times;</button>
             </div>
             <div id="guide-content" class="prose max-w-none"></div>
@@ -217,99 +228,70 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const routines = {
-        PUSH: { title: '💪 Día de Empuje (Push)', description: 'Pecho, Hombros y Tríceps', details: { exercises: [ { name: 'Press de Banca con Mancuernas', series: 4, reps: '8-12', rest: '60 seg', notes: 'Avanzado' }, { name: 'Press de Hombro Sentado con Mancuernas', series: 3, reps: '10-15', rest: '60 seg', notes: 'Avanzado' }, { name: 'Press Inclinado con Mancuernas', series: 3, reps: '10-15', rest: '60 seg', notes: 'Avanzado' }, { name: 'Flexiones Inclinadas', series: 3, reps: '10-15', rest: '60 seg', notes: 'Plan Anterior' }, { name: 'Aperturas con Ligas (Chest Flys)', series: 3, reps: '12-15', rest: '60 seg', notes: 'Plan Anterior' }, { name: 'Elevaciones Laterales', series: 3, reps: '15-20', rest: '45 seg', notes: 'Ambos Planes' }, { name: 'Pushdowns de Tríceps con Liga', series: 3, reps: '15-20', rest: '45 seg', notes: 'Avanzado' }, { name: 'Flexiones (Push-Ups)', series: 3, reps: 'Al fallo', rest: '60 seg', notes: 'Avanzado' } ] } },
-        PULL: { title: '🏋️‍♂️ Día de Tirón (Pull)', description: 'Espalda y Bíceps', details: { exercises: [ { name: 'Remo inclinado con mancuernas', series: 4, reps: '8-12', rest: '60 seg', notes: 'Avanzado' }, { name: 'Dominadas Asistidas/Negativas', series: 3, reps: '5-8 o Al fallo', rest: '90 seg', notes: 'Plan Anterior' }, { name: 'Remo a una mano con Mancuerna', series: 3, reps: '10-12 c/lado', rest: '60 seg', notes: 'Avanzado' }, { name: 'Remo con Ligas', series: 3, reps: '12-15', rest: '60 seg', notes: 'Plan Anterior' }, { name: 'Face Pulls con Liga de Resistencia', series: 3, reps: '15-20', rest: '45 seg', notes: 'Avanzado' }, { name: 'Curl de Bíceps con Mancuernas', series: 3, reps: '10-15', rest: '45 seg', notes: 'Avanzado' }, { name: 'Curl de Bíceps con Ligas', series: 2, reps: '15-20', rest: '45 seg', notes: 'Plan Anterior' }, { name: 'Curl Martillo con Mancuernas', series: 3, reps: '12-15', rest: '45 seg', notes: 'Avanzado' } ] } },
-        LEGS: { title: '🦵 Día de Pierna (Legs) y Core', description: 'Piernas, Glúteos y Abdomen', hasGuide: true, details: { exercises: [ { name: 'Sentadillas (Squats)', series: 4, reps: '10-15', rest: '60 seg', notes: 'Ambos Planes' }, { name: 'Peso Muerto Rumano', series: 3, reps: '12-15', rest: '60 seg', notes: 'Avanzado (con peso)' }, { name: 'Zancadas (Lunges) con Mancuernas', series: 3, reps: '10-12 c/pierna', rest: '60 seg', notes: 'Avanzado' }, { name: 'Puente de Glúteos', series: 3, reps: '15-20', rest: '60 seg', notes: 'Ambos Planes (con peso opcional)' }, { name: 'Elevación de Gemelos con Mancuernas', series: 4, reps: '15-20', rest: '45 seg', notes: 'Avanzado' }, { name: 'Plancha (sobre antebrazos)', series: 3, reps: '30-60 seg', rest: '45 seg', notes: 'Plan Anterior' }, { name: 'Pájaro-Perro (Bird-Dog)', series: 3, reps: '10 (c/lado)', rest: '45 seg', notes: 'Plan Anterior' } ] } },
+        PUSH: { title: '💪 Día de Empuje (Push)', hasGuide: true, description: 'Pecho, Hombros y Tríceps', details: { exercises: [ { name: 'Press de Banca con Mancuernas', series: 4, reps: '8-12', rest: '60 seg', notes: 'Avanzado' }, { name: 'Press de Hombro Sentado con Mancuernas', series: 3, reps: '10-15', rest: '60 seg', notes: 'Avanzado' }, { name: 'Press Inclinado con Mancuernas', series: 3, reps: '10-15', rest: '60 seg', notes: 'Avanzado' }, { name: 'Flexiones Inclinadas', series: 3, reps: '10-15', rest: '60 seg', notes: 'Plan Anterior' }, { name: 'Aperturas con Ligas (Chest Flys)', series: 3, reps: '12-15', rest: '60 seg', notes: 'Plan Anterior' }, { name: 'Elevaciones Laterales', series: 3, reps: '15-20', rest: '45 seg', notes: 'Ambos Planes' }, { name: 'Pushdowns de Tríceps con Liga', series: 3, reps: '15-20', rest: '45 seg', notes: 'Avanzado' }, { name: 'Flexiones (Push-Ups)', series: 3, reps: 'Al fallo', rest: '60 seg', notes: 'Avanzado' } ] } },
+        PULL: { title: '🏋️‍♂️ Día de Tirón (Pull)', hasGuide: true, description: 'Espalda y Bíceps', details: { exercises: [ { name: 'Remo inclinado con mancuernas', series: 4, reps: '8-12', rest: '60 seg', notes: 'Avanzado' }, { name: 'Dominadas Asistidas/Negativas', series: 3, reps: '5-8 o Al fallo', rest: '90 seg', notes: 'Plan Anterior' }, { name: 'Remo a una mano con Mancuerna', series: 3, reps: '10-12 c/lado', rest: '60 seg', notes: 'Avanzado' }, { name: 'Remo con Ligas', series: 3, reps: '12-15', rest: '60 seg', notes: 'Plan Anterior' }, { name: 'Face Pulls con Liga de Resistencia', series: 3, reps: '15-20', rest: '45 seg', notes: 'Avanzado' }, { name: 'Curl de Bíceps con Mancuernas', series: 3, reps: '10-15', rest: '45 seg', notes: 'Avanzado' }, { name: 'Curl de Bíceps con Ligas', series: 2, reps: '15-20', rest: '45 seg', notes: 'Plan Anterior' }, { name: 'Curl Martillo con Mancuernas', series: 3, reps: '12-15', rest: '45 seg', notes: 'Avanzado' } ] } },
+        LEGS: { title: '🦵 Día de Pierna (Legs) y Core', hasGuide: true, description: 'Piernas, Glúteos y Abdomen', details: { exercises: [ { name: 'Sentadillas (Squats)', series: 4, reps: '10-15', rest: '60 seg', notes: 'Ambos Planes' }, { name: 'Peso Muerto Rumano', series: 3, reps: '12-15', rest: '60 seg', notes: 'Avanzado (con peso)' }, { name: 'Zancadas (Lunges) con Mancuernas', series: 3, reps: '10-12 c/pierna', rest: '60 seg', notes: 'Avanzado' }, { name: 'Puente de Glúteos', series: 3, reps: '15-20', rest: '60 seg', notes: 'Ambos Planes (con peso opcional)' }, { name: 'Elevación de Gemelos con Mancuernas', series: 4, reps: '15-20', rest: '45 seg', notes: 'Avanzado' }, { name: 'Plancha (sobre antebrazos)', series: 3, reps: '30-60 seg', rest: '45 seg', notes: 'Plan Anterior' }, { name: 'Pájaro-Perro (Bird-Dog)', series: 3, reps: '10 (c/lado)', rest: '45 seg', notes: 'Plan Anterior' } ] } },
         REST: { title: '😴 Descanso', description: 'Recuperación y Crecimiento' }
     };
 
-    const legGuideContent = `
-        <div class="space-y-8">
-            <!-- Sentadillas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div>
-                    <h3 class="text-xl font-bold mb-2">1. Sentadillas (Squats)</h3>
-                    <p><strong>Descripción:</strong> Ejercicio fundamental para fortalecer piernas y glúteos.</p>
-                    <h5 class="font-semibold mt-2">Técnica:</h5>
-                    <ul class="list-disc list-inside ml-4 text-sm"><li>Pies al ancho de hombros, pecho erguido.</li><li>Baja las caderas hacia atrás y abajo, manteniendo espalda recta.</li><li>Baja hasta que los muslos estén paralelos al suelo.</li><li>Sube empujando desde los talones.</li></ul>
-                    <a href="https://www.youtube.com/watch?v=l7_B-mI4G6I" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
+    const guides = {
+        LEGS: {
+            title: 'Guía Visual de Pierna y Core',
+            content: `
+                <div class="space-y-8">
+                    <!-- Sentadillas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>1. Sentadillas (Squats)</h3><p><strong>Descripción:</strong> Ejercicio fundamental para fortalecer piernas y glúteos.</p><h5>Técnica:</h5><ul class="list-disc list-inside text-sm"><li>Pies al ancho de hombros, pecho erguido.</li><li>Baja las caderas hacia atrás y abajo, manteniendo espalda recta.</li><li>Baja hasta que los muslos estén paralelos al suelo.</li><li>Sube empujando desde los talones.</li></ul><a href="https://www.youtube.com/watch?v=l7_B-mI4G6I" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div><img src="imagenes/sentadillas.png" alt="Imagen de Sentadilla" class="rounded-lg shadow-lg w-full"></div></div><hr>
+                    <!-- Peso Muerto Rumano -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>2. Peso Muerto Rumano (RDL)</h3><p><strong>Descripción:</strong> Excelente para isquiotibiales, glúteos y la cadena posterior.</p><h5>Técnica:</h5><ul class="list-disc list-inside text-sm"><li>Ligera flexión de rodillas (no bloqueadas), espalda recta.</li><li>Inicia empujando las caderas hacia atrás.</li><li>Baja la carga cerca de las piernas hasta sentir un estiramiento.</li><li>Sube extendiendo las caderas.</li></ul><a href="https://www.youtube.com/watch?v=JCX0s_23b3A" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div><img src="imagenes/pesomuertorumano.png" alt="Imagen de Peso Muerto Rumano" class="rounded-lg shadow-lg w-full"></div></div><hr>
+                    <!-- Zancadas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>3. Zancadas (Lunges)</h3><p><strong>Descripción:</strong> Ejercicio unilateral que trabaja cuádriceps, isquiotibiales y glúteos.</p><h5>Técnica:</h5><ul class="list-disc list-inside text-sm"><li>Da un paso largo hacia adelante.</li><li>Baja las caderas hasta que ambas rodillas formen un ángulo de 90 grados.</li><li>La rodilla delantera alineada con el tobillo.</li><li>Empuja con el talón delantero para volver.</li></ul><a href="https://www.youtube.com/watch?v=zGq_T-gYQ9A" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div><img src="imagenes/zancadas.png" alt="Imagen de Zancada" class="rounded-lg shadow-lg w-full"></div></div><hr>
+                    <!-- Puente de Glúteos -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>4. Puente de Glúteos</h3><p><strong>Descripción:</strong> Activa y fortalece glúteos e isquiotibiales con bajo impacto.</p><h5>Técnica:</h5><ul class="list-disc list-inside text-sm"><li>Acuéstate boca arriba, rodillas flexionadas.</li><li>Levanta las caderas formando una línea recta de hombros a rodillas.</li><li>Aprieta los glúteos en la cima.</li></ul><a href="https://www.youtube.com/watch?v=8bbE64NuDTU" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div><img src="imagenes/puente de gluteos.png" alt="Imagen de Puente de Glúteos" class="rounded-lg shadow-lg w-full"></div></div><hr>
+                    <!-- Elevación de Gemelos -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>5. Elevación de Gemelos</h3><p><strong>Descripción:</strong> Se enfoca en los músculos de la pantorrilla.</p><h5>Técnica:</h5><ul class="list-disc list-inside text-sm"><li>De pie, con o sin una superficie elevada.</li><li>Levanta los talones tan alto como puedas.</li><li>Baja lentamente para un estiramiento completo.</li></ul><a href="https://www.youtube.com/watch?v=3u_j7g-p4w4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div><img src="imagenes/Elevación de Gemelos con Mancuernas.png" alt="Imagen de Elevación de Gemelos" class="rounded-lg shadow-lg w-full"></div></div><hr>
+                    <!-- Plancha -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>6. Plancha sobre Antebrazos</h3><p><strong>Descripción:</strong> Fortalece el core en su totalidad.</p><h5>Técnica:</h5><ul class="list-disc list-inside text-sm"><li>Apóyate sobre antebrazos y puntas de los pies.</li><li>Cuerpo en línea recta de cabeza a talones.</li><li>Mantén el abdomen contraído.</li></ul><a href="https://www.youtube.com/watch?v=E_A3j3A-H7k" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div><img src="imagenes/Plancha.png" alt="Imagen de Plancha" class="rounded-lg shadow-lg w-full"></div></div><hr>
+                    <!-- Pájaro-Perro -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>7. Pájaro-Perro (Bird-Dog)</h3><p><strong>Descripción:</strong> Mejora la estabilidad del core y la coordinación.</p><h5>Técnica:</h5><ul class="list-disc list-inside text-sm"><li>A cuatro patas, espalda recta.</li><li>Extiende un brazo hacia adelante y la pierna opuesta hacia atrás.</li><li>Mantén el equilibrio y regresa controladamente.</li></ul><a href="https://www.youtube.com/watch?v=2b_j_Yq-3Qc" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div><img src="imagenes/Pájaro-Perro.png" alt="Imagen de Pájaro-Perro" class="rounded-lg shadow-lg w-full"></div></div>
                 </div>
-                <div><img src="imagenes/sentadillas.png" alt="Imagen de Sentadilla" class="rounded-lg shadow-lg w-full"></div>
-            </div>
-            <hr>
-            <!-- Peso Muerto Rumano -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div>
-                    <h3 class="text-xl font-bold mb-2">2. Peso Muerto Rumano (RDL)</h3>
-                    <p><strong>Descripción:</strong> Excelente para isquiotibiales, glúteos y la cadena posterior.</p>
-                    <h5 class="font-semibold mt-2">Técnica:</h5>
-                    <ul class="list-disc list-inside ml-4 text-sm"><li>Ligera flexión de rodillas (no bloqueadas), espalda recta.</li><li>Inicia empujando las caderas hacia atrás.</li><li>Baja la carga cerca de las piernas hasta sentir un estiramiento.</li><li>Sube extendiendo las caderas.</li></ul>
-                    <a href="https://www.youtube.com/watch?v=JCX0s_23b3A" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
+            `
+        },
+        TORSO: {
+            title: 'Guía Visual de Torso',
+            content: `
+                <div class="space-y-8">
+                    <!-- Press de Banca con Mancuernas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Press de Banca con Mancuernas</h3><a href="https://www.youtube.com/watch?v=999-y4p2iS4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Press de Hombro Sentado -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Press de Hombro Sentado</h3><a href="https://www.youtube.com/watch?v=8Aiw_o0aE1g" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Flexiones Inclinadas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Flexiones Inclinadas</h3><a href="https://www.youtube.com/watch?v=Z0bRiX_L6uA" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Aperturas con Ligas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Aperturas con Ligas</h3><a href="https://www.youtube.com/watch?v=Z0bRiX_L6uA" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Elevaciones Laterales -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Elevaciones Laterales</h3><a href="https://www.youtube.com/watch?v=34B2-kI_L-M" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Pushdowns de Tríceps -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Pushdowns de Tríceps con Liga</h3><a href="https://www.youtube.com/watch?v=999-y4p2iS4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Flexiones (Push-Ups) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Flexiones (Push-Ups)</h3><a href="https://www.youtube.com/watch?v=P_Vui-hG3aI" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Remo inclinado con mancuernas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Remo inclinado con mancuernas</h3><a href="https://www.youtube.com/watch?v=999-y4p2iS4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Dominadas Asistidas/Negativas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Dominadas Asistidas/Negativas</h3><a href="https://www.youtube.com/watch?v=vG-x9g3vY-M" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Remo a una mano con Mancuerna -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Remo a una mano con Mancuerna</h3><a href="https://www.youtube.com/watch?v=999-y4p2iS4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Remo con Ligas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Remo con Ligas</h3><a href="https://www.youtube.com/watch?v=999-y4p2iS4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Face Pulls con Liga -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Face Pulls con Liga</h3><a href="https://www.youtube.com/watch?v=999-y4p2iS4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Curl de Bíceps con Mancuernas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Curl de Bíceps con Mancuernas</h3><a href="https://www.youtube.com/watch?v=999-y4p2iS4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div><hr>
+                    <!-- Curl Martillo con Mancuernas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center"><div class="prose"><h3>Curl Martillo con Mancuernas</h3><a href="https://www.youtube.com/watch?v=999-y4p2iS4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a></div><div class="img-placeholder"><span>Espacio para tu imagen</span></div></div>
                 </div>
-                <div><img src="imagenes/pesomuertorumano.png" alt="Imagen de Peso Muerto Rumano" class="rounded-lg shadow-lg w-full"></div>
-            </div>
-            <hr>
-            <!-- Zancadas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div>
-                    <h3 class="text-xl font-bold mb-2">3. Zancadas (Lunges) con Mancuernas</h3>
-                    <p><strong>Descripción:</strong> Ejercicio unilateral que trabaja cuádriceps, isquiotibiales y glúteos.</p>
-                    <h5 class="font-semibold mt-2">Técnica:</h5>
-                    <ul class="list-disc list-inside ml-4 text-sm"><li>Da un paso largo hacia adelante.</li><li>Baja las caderas hasta que ambas rodillas formen un ángulo de 90 grados.</li><li>La rodilla delantera alineada con el tobillo.</li><li>Empuja con el talón delantero para volver.</li></ul>
-                    <a href="https://www.youtube.com/watch?v=zGq_T-gYQ9A" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
-                </div>
-                <div><img src="imagenes/zancadas.png" alt="Imagen de Zancada" class="rounded-lg shadow-lg w-full"></div>
-            </div>
-            <hr>
-            <!-- Puente de Glúteos -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div>
-                    <h3 class="text-xl font-bold mb-2">4. Puente de Glúteos (Glute Bridge)</h3>
-                    <p><strong>Descripción:</strong> Activa y fortalece glúteos e isquiotibiales con bajo impacto.</p>
-                    <h5 class="font-semibold mt-2">Técnica:</h5>
-                    <ul class="list-disc list-inside ml-4 text-sm"><li>Acuéstate boca arriba, rodillas flexionadas.</li><li>Levanta las caderas formando una línea recta de hombros a rodillas.</li><li>Aprieta los glúteos en la cima.</li></ul>
-                    <a href="https://www.youtube.com/watch?v=8bbE64NuDTU" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
-                </div>
-                <div><img src="imagenes/puente de gluteos.png" alt="Imagen de Puente de Glúteos" class="rounded-lg shadow-lg w-full"></div>
-            </div>
-            <hr>
-            <!-- Elevación de Gemelos -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div>
-                    <h3 class="text-xl font-bold mb-2">5. Elevación de Gemelos con Mancuernas</h3>
-                    <p><strong>Descripción:</strong> Se enfoca en los músculos de la pantorrilla.</p>
-                    <h5 class="font-semibold mt-2">Técnica:</h5>
-                    <ul class="list-disc list-inside ml-4 text-sm"><li>De pie, con o sin una superficie elevada.</li><li>Levanta los talones tan alto como puedas.</li><li>Baja lentamente para un estiramiento completo.</li></ul>
-                    <a href="https://www.youtube.com/watch?v=3u_j7g-p4w4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
-                </div>
-                <div><img src="imagenes/Elevación de Gemelos con Mancuernas.png" alt="Imagen de Elevación de Gemelos" class="rounded-lg shadow-lg w-full"></div>
-            </div>
-            <hr>
-            <!-- Plancha -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div>
-                    <h3 class="text-xl font-bold mb-2">6. Plancha (Plank) sobre Antebrazos</h3>
-                    <p><strong>Descripción:</strong> Fortalece el core en su totalidad.</p>
-                    <h5 class="font-semibold mt-2">Técnica:</h5>
-                    <ul class="list-disc list-inside ml-4 text-sm"><li>Apóyate sobre antebrazos y puntas de los pies.</li><li>Cuerpo en línea recta de cabeza a talones.</li><li>Mantén el abdomen contraído.</li></ul>
-                    <a href="https://www.youtube.com/watch?v=E_A3j3A-H7k" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
-                </div>
-                <div><img src="imagenes/Plancha.png" alt="Imagen de Plancha" class="rounded-lg shadow-lg w-full"></div>
-            </div>
-            <hr>
-            <!-- Pájaro-Perro -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div>
-                    <h3 class="text-xl font-bold mb-2">7. Pájaro-Perro (Bird-Dog)</h3>
-                    <p><strong>Descripción:</strong> Mejora la estabilidad del core y la coordinación.</p>
-                    <h5 class="font-semibold mt-2">Técnica:</h5>
-                    <ul class="list-disc list-inside ml-4 text-sm"><li>A cuatro patas, espalda recta.</li><li>Extiende un brazo hacia adelante y la pierna opuesta hacia atrás.</li><li>Mantén el equilibrio y regresa controladamente.</li></ul>
-                    <a href="https://www.youtube.com/watch?v=2b_j_Yq-3Qc" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
-                </div>
-                <div><img src="imagenes/Pájaro-Perro.png" alt="Imagen de Pájaro-Perro" class="rounded-lg shadow-lg w-full"></div>
-            </div>
-        </div>
-    `;
+            `
+        }
+    };
     
     const today = new Date();
     const year = today.getFullYear();
@@ -356,7 +338,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let guideButtonHTML = '';
         if (routineData.hasGuide) {
-            guideButtonHTML = `<div class="text-center my-4"><button id="show-guide-btn" class="bg-[#c5a265] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#b38e52] transition-colors">Ver Guía Visual de Ejercicios</button></div>`;
+            let guideType = (routineKey === 'LEGS') ? 'LEGS' : 'TORSO';
+            guideButtonHTML = `<div class="text-center my-4"><button data-guide="${guideType}" class="show-guide-btn bg-[#c5a265] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#b38e52] transition-colors">Ver Guía Visual de Ejercicios</button></div>`;
         }
 
         let header = `<div class="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-stone-200">
@@ -532,14 +515,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initModal() {
         const modal = document.getElementById('guide-modal');
+        const guideTitle = document.getElementById('guide-title');
         const guideContent = document.getElementById('guide-content');
         const closeBtn = document.getElementById('close-guide-btn');
         
-        guideContent.innerHTML = legGuideContent;
-
         mainContent.addEventListener('click', (e) => {
-            if (e.target.id === 'show-guide-btn') {
-                modal.classList.remove('hidden');
+            if (e.target.classList.contains('show-guide-btn')) {
+                const guideKey = e.target.dataset.guide;
+                const guideData = guides[guideKey];
+                if(guideData) {
+                    guideTitle.textContent = guideData.title;
+                    guideContent.innerHTML = guideData.content;
+                    modal.classList.remove('hidden');
+                }
             }
         });
 
