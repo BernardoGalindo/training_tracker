@@ -1,0 +1,13 @@
+body { font-family: 'Inter', sans-serif; background-color: #f9f9f9; color: #2c3144; margin: 20px; }
+h1, h2, h3 { font-family: 'Lora', serif; color: #2c3144; }
+h1 { text-align: center; }
+.week { margin-bottom: 30px; }
+.day { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.day h3 { color: #5a6e5f; border-bottom: 2px solid #c5a265; padding-bottom: 10px; }
+table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+th { background-color: #6d7b8d; color: #f9f9f9; }
+.completed-checkbox { width: 80px; text-align: center; }
+.notes-input { width: 100%; border: 1px solid #ccc; border-radius: 4px; padding: 8px; }
+.save-btn { background-color: #c5a265; color: #fff; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; font-size: 18px; margin-top: 20px; display: block; margin-left: auto; margin-right: auto; transition: background-color 0.3s; }
+.save-btn:hover { background-color: #b38e52; }

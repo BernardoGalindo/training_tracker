@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Blueprint de Fitness Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lora:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5F4; /* stone-100 */
+            color: #3f3f46; /* stone-700 */
+        }
+        h1, h2, h3, h4, h5 {
+             font-family: 'Lora', serif;
+        }
+        .tab-active {
+            border-color: #c5a265; /* Bruma Gold */
+            color: #2c3144; /* Deep Charcoal */
+            background-color: rgba(197, 162, 101, 0.1);
+        }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        .calendar-day { min-height: 100px; }
+        .calendar-day-header {
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 4px 0;
+            background-color: #F5F5F4;
+            font-family: 'Inter', sans-serif;
+        }
+        .today {
+            border: 2px solid #c5a265; /* Bruma Gold */
+            box-shadow: 0 0 8px rgba(197, 162, 101, 0.5);
+        }
+        .progress-bar-container {
+            background-color: #e5e7eb; /* cool-gray-200 */
+            border-radius: 9999px;
+            height: 1.25rem;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid #d4d4d8;
+        }
+        .progress-bar {
+            background-color: #c5a265; /* Bruma Gold */
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+        }
+        /* Estilos para el Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 60rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto max-w-5xl p-4 sm:p-6">
+        
+        <header class="text-center mb-6">
+            <h1 class="text-3xl sm:text-4xl font-bold text-stone-900">Mi Blueprint de Fitness</h1>
+            <p class="text-stone-600 mt-2">Tu plan de entrenamiento avanzado, fusionado e interactivo.</p>
+        </header>
+
+        <div class="mb-8 p-4 bg-white rounded-lg shadow-md border border-stone-200">
+            <h2 class="text-center text-xl font-bold text-stone-800 mb-3">Progreso Mensual General</h2>
+            <div id="global-progress-text" class="text-center font-bold text-lg mb-2 text-[#5a6e5f]">0%</div>
+            <div class="progress-bar-container">
+                <div id="global-progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+
+        <nav class="flex justify-center border-b border-stone-200 mb-8">
+            <div class="flex flex-wrap justify-center -mb-px">
+                <button data-tab="hoy" class="nav-tab text-md sm:text-lg py-3 px-3 sm:px-6 font-semibold border-b-2 border-transparent hover:text-[#b38e52] transition-colors duration-200">🗓️ Hoy</button>
+                <button data-tab="calendario" class="nav-tab text-md sm:text-lg py-3 px-3 sm:px-6 font-semibold border-b-2 border-transparent hover:text-[#b38e52] transition-colors duration-200">📅 Calendario</button>
+                <button data-tab="rutinas" class="nav-tab text-md sm:text-lg py-3 px-3 sm:px-6 font-semibold border-b-2 border-transparent hover:text-[#b38e52] transition-colors duration-200">🏋️‍♂️ Rutinas</button>
+                <button data-tab="pilares" class="nav-tab text-md sm:text-lg py-3 px-3 sm:px-6 font-semibold border-b-2 border-transparent hover:text-[#b38e52] transition-colors duration-200">🍏 Pilares</button>
+            </div>
+        </nav>
+
+        <main id="main-content">
+            <section id="hoy" class="content-section"></section>
+            <section id="calendario" class="content-section">
+                 <div class="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-stone-200">
+                    <div class="text-center mb-6">
+                        <h2 id="calendar-title" class="text-2xl font-bold"></h2>
+                        <p class="text-stone-600 mt-1">Un vistazo completo a tu mes de entrenamiento.</p>
+                    </div>
+                    <div class="calendar-grid font-semibold text-stone-600">
+                        <div class="calendar-day-header">Lunes</div>
+                        <div class="calendar-day-header">Martes</div>
+                        <div class="calendar-day-header">Miércoles</div>
+                        <div class="calendar-day-header">Jueves</div>
+                        <div class="calendar-day-header">Viernes</div>
+                        <div class="calendar-day-header">Sábado</div>
+                        <div class="calendar-day-header">Domingo</div>
+                    </div>
+                    <div id="calendar-body" class="calendar-grid"></div>
+                </div>
+            </section>
+            <section id="rutinas" class="content-section">
+                <div class="mb-6 text-center">
+                    <p class="text-stone-600">Aquí puedes consultar los detalles de cada rutina. Selecciona una para ver los ejercicios.</p>
+                </div>
+                <div class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8">
+                    <button data-routine="PUSH" class="routine-selector bg-white hover:bg-stone-50 text-[#5a6e5f] font-semibold py-2 px-4 border border-stone-200 rounded-lg shadow-sm transition-all duration-200">💪 Día de Empuje (Push)</button>
+                    <button data-routine="PULL" class="routine-selector bg-white hover:bg-stone-50 text-[#5a6e5f] font-semibold py-2 px-4 border border-stone-200 rounded-lg shadow-sm transition-all duration-200">🏋️‍♂️ Día de Tirón (Pull)</button>
+                    <button data-routine="LEGS" class="routine-selector bg-white hover:bg-stone-50 text-[#5a6e5f] font-semibold py-2 px-4 border border-stone-200 rounded-lg shadow-sm transition-all duration-200">🦵 Día de Pierna (Legs)</button>
+                </div>
+                <div id="routine-details-container"></div>
+            </section>
+            <section id="pilares" class="content-section space-y-4">
+                 <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold">Principios Fundamentales</h2>
+                    <p class="text-stone-600 mt-1">Recuerda siempre las bases de tu plan para un progreso seguro y sostenible.</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold">
+                        <span>⚠️ Fase 0: La Seguridad es lo Primero</span>
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content pt-2">
+                        <ul class="list-disc list-inside space-y-2 text-stone-700">
+                            <li><strong>Consulta Profesional:</strong> Habla con tu médico o fisioterapeuta antes de empezar.</li>
+                            <li><strong>El Dolor es una Señal de PARAR:</strong> Nunca ignores un dolor agudo. Si duele, para.</li>
+                            <li><strong>Técnica > Peso:</strong> Una forma perfecta sin peso es mejor que una mala técnica con peso.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold">
+                        <span>🧠 Fase 1: La Mentalidad y los Fundamentos</span>
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content pt-2">
+                         <ul class="list-disc list-inside space-y-2 text-stone-700">
+                            <li><strong>Define tu "Porqué":</strong> Escríbelo y ponlo a la vista para mantenerte motivado.</li>
+                            <li><strong>Progreso, no Perfección:</strong> Si fallas un día, simplemente retómalo al siguiente.</li>
+                            <li><strong>Compromiso Mínimo:</strong> El objetivo es empezar. ¡10 minutos ya es una victoria!</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold">
+                        <span>🍏 Fase 2: Los 4 Pilares del Éxito</span>
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content pt-2">
+                        <ul class="list-disc list-inside space-y-2 text-stone-700">
+                           <li><strong>Entrenamiento Inteligente:</strong> Sigue el plan con consistencia.</li>
+                           <li><strong>Nutrición Consciente:</strong> Prioriza proteína, vegetales y agua.</li>
+                           <li><strong>Descanso Reparador:</strong> 7-8 horas de sueño son clave para la recuperación.</li>
+                           <li><strong>Paciencia y Consistencia:</strong> Los cambios reales y duraderos toman tiempo.</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="bg-white p-4 rounded-lg shadow-sm border border-stone-200">
+                    <button class="accordion-toggle flex justify-between items-center w-full text-left text-xl font-semibold">
+                        <span>📈 Fase 4: ¿Cómo Progresar de Forma Segura?</span>
+                        <span class="transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content pt-2">
+                       <ul class="list-disc list-inside space-y-2 text-stone-700">
+                           <li>Aumenta Repeticiones → Aumenta Series → Usa Ligas/Pesos más Duros → Reduce Descanso.</li>
+                           <li><strong>Regla de Oro:</strong> La progresión debe ser siempre libre de dolor.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal para la Guía de Ejercicios -->
+    <div id="guide-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">Guía Visual de Pierna y Core</h2>
+                <button id="close-guide-btn" class="text-2xl font-bold">&times;</button>
+            </div>
+            <div id="guide-content" class="prose max-w-none"></div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const routines = {
+        PUSH: { title: '💪 Día de Empuje (Push)', description: 'Pecho, Hombros y Tríceps', details: { exercises: [ { name: 'Press de Banca con Mancuernas', series: 4, reps: '8-12', rest: '60 seg', notes: 'Avanzado' }, { name: 'Press de Hombro Sentado con Mancuernas', series: 3, reps: '10-15', rest: '60 seg', notes: 'Avanzado' }, { name: 'Press Inclinado con Mancuernas', series: 3, reps: '10-15', rest: '60 seg', notes: 'Avanzado' }, { name: 'Flexiones Inclinadas', series: 3, reps: '10-15', rest: '60 seg', notes: 'Plan Anterior' }, { name: 'Aperturas con Ligas (Chest Flys)', series: 3, reps: '12-15', rest: '60 seg', notes: 'Plan Anterior' }, { name: 'Elevaciones Laterales', series: 3, reps: '15-20', rest: '45 seg', notes: 'Ambos Planes' }, { name: 'Pushdowns de Tríceps con Liga', series: 3, reps: '15-20', rest: '45 seg', notes: 'Avanzado' }, { name: 'Flexiones (Push-Ups)', series: 3, reps: 'Al fallo', rest: '60 seg', notes: 'Avanzado' } ] } },
+        PULL: { title: '🏋️‍♂️ Día de Tirón (Pull)', description: 'Espalda y Bíceps', details: { exercises: [ { name: 'Remo inclinado con mancuernas', series: 4, reps: '8-12', rest: '60 seg', notes: 'Avanzado' }, { name: 'Dominadas Asistidas/Negativas', series: 3, reps: '5-8 o Al fallo', rest: '90 seg', notes: 'Plan Anterior' }, { name: 'Remo a una mano con Mancuerna', series: 3, reps: '10-12 c/lado', rest: '60 seg', notes: 'Avanzado' }, { name: 'Remo con Ligas', series: 3, reps: '12-15', rest: '60 seg', notes: 'Plan Anterior' }, { name: 'Face Pulls con Liga de Resistencia', series: 3, reps: '15-20', rest: '45 seg', notes: 'Avanzado' }, { name: 'Curl de Bíceps con Mancuernas', series: 3, reps: '10-15', rest: '45 seg', notes: 'Avanzado' }, { name: 'Curl de Bíceps con Ligas', series: 2, reps: '15-20', rest: '45 seg', notes: 'Plan Anterior' }, { name: 'Curl Martillo con Mancuernas', series: 3, reps: '12-15', rest: '45 seg', notes: 'Avanzado' } ] } },
+        LEGS: { title: '🦵 Día de Pierna (Legs) y Core', description: 'Piernas, Glúteos y Abdomen', hasGuide: true, details: { exercises: [ { name: 'Sentadillas (Squats)', series: 4, reps: '10-15', rest: '60 seg', notes: 'Ambos Planes' }, { name: 'Peso Muerto Rumano', series: 3, reps: '12-15', rest: '60 seg', notes: 'Avanzado (con peso)' }, { name: 'Zancadas (Lunges) con Mancuernas', series: 3, reps: '10-12 c/pierna', rest: '60 seg', notes: 'Avanzado' }, { name: 'Puente de Glúteos', series: 3, reps: '15-20', rest: '60 seg', notes: 'Ambos Planes (con peso opcional)' }, { name: 'Elevación de Gemelos con Mancuernas', series: 4, reps: '15-20', rest: '45 seg', notes: 'Avanzado' }, { name: 'Plancha (sobre antebrazos)', series: 3, reps: '30-60 seg', rest: '45 seg', notes: 'Plan Anterior' }, { name: 'Pájaro-Perro (Bird-Dog)', series: 3, reps: '10 (c/lado)', rest: '45 seg', notes: 'Plan Anterior' } ] } },
+        REST: { title: '😴 Descanso', description: 'Recuperación y Crecimiento' }
+    };
+
+    const legGuideContent = `
+        <div class="space-y-8">
+            <!-- Sentadillas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">1. Sentadillas (Squats)</h3>
+                    <p><strong>Descripción:</strong> Ejercicio fundamental para fortalecer piernas y glúteos.</p>
+                    <h5 class="font-semibold mt-2">Técnica:</h5>
+                    <ul class="list-disc list-inside ml-4 text-sm"><li>Pies al ancho de hombros, pecho erguido.</li><li>Baja las caderas hacia atrás y abajo, manteniendo espalda recta.</li><li>Baja hasta que los muslos estén paralelos al suelo.</li><li>Sube empujando desde los talones.</li></ul>
+                    <a href="https://www.youtube.com/watch?v=l7_B-mI4G6I" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
+                </div>
+                <div><img src="imagenes/sentadillas.png" alt="Imagen de Sentadilla" class="rounded-lg shadow-lg w-full"></div>
+            </div>
+            <hr>
+            <!-- Peso Muerto Rumano -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">2. Peso Muerto Rumano (RDL)</h3>
+                    <p><strong>Descripción:</strong> Excelente para isquiotibiales, glúteos y la cadena posterior.</p>
+                    <h5 class="font-semibold mt-2">Técnica:</h5>
+                    <ul class="list-disc list-inside ml-4 text-sm"><li>Ligera flexión de rodillas (no bloqueadas), espalda recta.</li><li>Inicia empujando las caderas hacia atrás.</li><li>Baja la carga cerca de las piernas hasta sentir un estiramiento.</li><li>Sube extendiendo las caderas.</li></ul>
+                    <a href="https://www.youtube.com/watch?v=JCX0s_23b3A" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
+                </div>
+                <div><img src="imagenes/pesomuertorumano.png" alt="Imagen de Peso Muerto Rumano" class="rounded-lg shadow-lg w-full"></div>
+            </div>
+            <hr>
+            <!-- Zancadas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">3. Zancadas (Lunges) con Mancuernas</h3>
+                    <p><strong>Descripción:</strong> Ejercicio unilateral que trabaja cuádriceps, isquiotibiales y glúteos.</p>
+                    <h5 class="font-semibold mt-2">Técnica:</h5>
+                    <ul class="list-disc list-inside ml-4 text-sm"><li>Da un paso largo hacia adelante.</li><li>Baja las caderas hasta que ambas rodillas formen un ángulo de 90 grados.</li><li>La rodilla delantera alineada con el tobillo.</li><li>Empuja con el talón delantero para volver.</li></ul>
+                    <a href="https://www.youtube.com/watch?v=zGq_T-gYQ9A" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
+                </div>
+                <div><img src="imagenes/zancadas.png" alt="Imagen de Zancada" class="rounded-lg shadow-lg w-full"></div>
+            </div>
+            <hr>
+            <!-- Puente de Glúteos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">4. Puente de Glúteos (Glute Bridge)</h3>
+                    <p><strong>Descripción:</strong> Activa y fortalece glúteos e isquiotibiales con bajo impacto.</p>
+                    <h5 class="font-semibold mt-2">Técnica:</h5>
+                    <ul class="list-disc list-inside ml-4 text-sm"><li>Acuéstate boca arriba, rodillas flexionadas.</li><li>Levanta las caderas formando una línea recta de hombros a rodillas.</li><li>Aprieta los glúteos en la cima.</li></ul>
+                    <a href="https://www.youtube.com/watch?v=8bbE64NuDTU" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
+                </div>
+                <div><img src="imagenes/puente de gluteos.png" alt="Imagen de Puente de Glúteos" class="rounded-lg shadow-lg w-full"></div>
+            </div>
+            <hr>
+            <!-- Elevación de Gemelos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">5. Elevación de Gemelos con Mancuernas</h3>
+                    <p><strong>Descripción:</strong> Se enfoca en los músculos de la pantorrilla.</p>
+                    <h5 class="font-semibold mt-2">Técnica:</h5>
+                    <ul class="list-disc list-inside ml-4 text-sm"><li>De pie, con o sin una superficie elevada.</li><li>Levanta los talones tan alto como puedas.</li><li>Baja lentamente para un estiramiento completo.</li></ul>
+                    <a href="https://www.youtube.com/watch?v=3u_j7g-p4w4" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
+                </div>
+                <div><img src="imagenes/Elevación de Gemelos con Mancuernas.png" alt="Imagen de Elevación de Gemelos" class="rounded-lg shadow-lg w-full"></div>
+            </div>
+            <hr>
+            <!-- Plancha -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">6. Plancha (Plank) sobre Antebrazos</h3>
+                    <p><strong>Descripción:</strong> Fortalece el core en su totalidad.</p>
+                    <h5 class="font-semibold mt-2">Técnica:</h5>
+                    <ul class="list-disc list-inside ml-4 text-sm"><li>Apóyate sobre antebrazos y puntas de los pies.</li><li>Cuerpo en línea recta de cabeza a talones.</li><li>Mantén el abdomen contraído.</li></ul>
+                    <a href="https://www.youtube.com/watch?v=E_A3j3A-H7k" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
+                </div>
+                <div><img src="imagenes/Plancha.png" alt="Imagen de Plancha" class="rounded-lg shadow-lg w-full"></div>
+            </div>
+            <hr>
+            <!-- Pájaro-Perro -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">7. Pájaro-Perro (Bird-Dog)</h3>
+                    <p><strong>Descripción:</strong> Mejora la estabilidad del core y la coordinación.</p>
+                    <h5 class="font-semibold mt-2">Técnica:</h5>
+                    <ul class="list-disc list-inside ml-4 text-sm"><li>A cuatro patas, espalda recta.</li><li>Extiende un brazo hacia adelante y la pierna opuesta hacia atrás.</li><li>Mantén el equilibrio y regresa controladamente.</li></ul>
+                    <a href="https://www.youtube.com/watch?v=2b_j_Yq-3Qc" target="_blank" class="text-blue-600 hover:underline mt-2 inline-block">Ver video en YouTube</a>
+                </div>
+                <div><img src="imagenes/Pájaro-Perro.png" alt="Imagen de Pájaro-Perro" class="rounded-lg shadow-lg w-full"></div>
+            </div>
+        </div>
+    `;
+    
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const day = today.getDate();
+    const dateKey = `${year}-${month + 1}-${day}`;
+
+    const schedulePattern = ['PUSH', 'PULL', 'LEGS', 'PUSH', 'PULL', 'LEGS', 'REST'];
+    const monthlySchedule = {};
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const date = new Date(year, month, d);
+        const dayOfWeek = date.getDay();
+        const patternIndex = (dayOfWeek === 0) ? 6 : dayOfWeek - 1;
+        monthlySchedule[d] = schedulePattern[patternIndex];
+    }
+    
+    const tabs = document.querySelectorAll('.nav-tab');
+    const contentSections = document.querySelectorAll('.content-section');
+    const routineSelectors = document.querySelectorAll('.routine-selector');
+    const routineDetailsContainer = document.getElementById('routine-details-container');
+    const hoyContainer = document.getElementById('hoy');
+    const calendarBody = document.getElementById('calendar-body');
+    const calendarTitle = document.getElementById('calendar-title');
+    const mainContent = document.getElementById('main-content');
+
+    function createRoutineHTML(routineKey, isTodayView) {
+        const routineData = routines[routineKey];
+        if (!routineData) return '<p>Rutina no encontrada.</p>';
+        
+        let progressHTML = '';
+        if (isTodayView) {
+            progressHTML = `
+                <div class="mb-6">
+                    <h3 class="text-center font-bold text-xl mb-3">Progreso Diario</h3>
+                    <div id="progress-text" class="text-center font-bold text-lg mb-2 text-[#5a6e5f]">0%</div>
+                    <div class="progress-bar-container" style="height: 1rem;">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        let guideButtonHTML = '';
+        if (routineData.hasGuide) {
+            guideButtonHTML = `<div class="text-center my-4"><button id="show-guide-btn" class="bg-[#c5a265] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#b38e52] transition-colors">Ver Guía Visual de Ejercicios</button></div>`;
+        }
+
+        let header = `<div class="bg-white p-4 sm:p-6 rounded-lg shadow-md border border-stone-200">
+                        ${progressHTML}
+                        <h2 class="text-2xl font-bold mb-1 text-center">${routineData.title}</h2>
+                        <p class="text-center text-stone-500 mb-2">${routineData.description}</p>
+                        ${guideButtonHTML}`;
+
+        let tableHeader = `
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-stone-50">
+                        <tr>
+                            <th class="p-3 font-semibold text-sm">Ejercicio</th>
+                            <th class="p-3 font-semibold text-sm text-center">Series</th>
+                            <th class="p-3 font-semibold text-sm text-center">Reps</th>
+                            <th class="p-3 font-semibold text-sm text-center">Descanso</th>
+                            <th class="p-3 font-semibold text-sm">Notas</th>
+                            ${isTodayView ? '<th class="p-3 font-semibold text-sm text-center">Hecho</th>' : ''}
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        
+        let tableRows = routineData.details.exercises.map((ex, index) => `
+            <tr class="border-b border-stone-200 last:border-b-0">
+                <td class="p-3 font-medium">${ex.name}</td>
+                <td class="p-3 text-center">${ex.series}</td>
+                <td class="p-3 text-center">${ex.reps}</td>
+                <td class="p-3 text-center">${ex.rest}</td>
+                <td class="p-3 text-sm text-stone-600">${ex.notes || ''}</td>
+                ${isTodayView ? `<td class="p-3 text-center"><input type="checkbox" data-exercise-index="${index}" class="h-5 w-5 rounded text-[#c5a265] focus:ring-[#b38e52]"></td>` : ''}
+            </tr>
+        `).join('');
+        
+        let tableFooter = `</tbody></table></div>`;
+        let commonSections = `
+            <div class="mt-6 p-4 bg-[#5a6e5f]/10 text-[#2c3144] rounded-lg">
+                <h4 class="font-bold">▶️ Calentamiento (10 min antes)</h4>
+                <p class="text-sm">Movilidad de muñecas, Jumping Jacks, Círculos de brazos, Sentadillas sin peso, Gato-Vaca.</p>
+            </div>
+            <div class="mt-4 p-4 bg-[#6d7b8d]/10 text-[#2c3144] rounded-lg">
+                <h4 class="font-bold">⏸️ Enfriamiento (10 min después)</h4>
+                <p class="text-sm">Gato-Vaca, Postura del Niño, Estiramiento de Piriforme, Estiramiento de pecho y muñecas.</p>
+            </div>
+        `;
+        
+        return header + tableHeader + tableRows + tableFooter + commonSections + `</div>`;
+    }
+
+    function displayTodaysPlan() {
+        const activityKey = monthlySchedule[day];
+        const activity = routines[activityKey];
+        const todayName = today.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        let content = '';
+        if (activityKey !== 'REST') {
+            content = `<div class="text-center mb-6">
+                           <h2 class="text-3xl font-bold">Plan para Hoy</h2>
+                           <p class="text-stone-500">${todayName}</p>
+                       </div>
+                       ${createRoutineHTML(activityKey, true)}`;
+        } else {
+             content = `<div class="bg-white p-6 rounded-lg shadow-md border border-stone-200 text-center">
+                           <h2 class="text-3xl font-bold">Plan para Hoy</h2>
+                           <p class="text-stone-500 mb-4">${todayName}</p>
+                           <p class="text-2xl mt-4 text-[#5a6e5f]">${activity.title}</p>
+                           <p class="mt-2 text-stone-600">${activity.description}. ¡Escucha a tu cuerpo!</p>
+                       </div>`;
+        }
+        hoyContainer.innerHTML = content;
+        loadProgress();
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const checkboxes = document.querySelectorAll('#hoy input[type="checkbox"]');
+        const total = checkboxes.length;
+        if (total === 0) return;
+
+        const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+        const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+        
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        if (progressBar) progressBar.style.width = `${percentage}%`;
+        if (progressText) progressText.textContent = `${percentage}% Completado`;
+    }
+
+    function saveProgress() {
+        const checkboxes = document.querySelectorAll('#hoy input[type="checkbox"]');
+        const progress = Array.from(checkboxes).map(cb => cb.checked);
+        localStorage.setItem(dateKey, JSON.stringify(progress));
+    }
+
+    function loadProgress() {
+        const savedProgress = JSON.parse(localStorage.getItem(dateKey));
+        if (savedProgress) {
+            const checkboxes = document.querySelectorAll('#hoy input[type="checkbox"]');
+            checkboxes.forEach((cb, index) => {
+                if (savedProgress[index]) {
+                    cb.checked = true;
+                }
+            });
+        }
+    }
+
+    function updateGlobalProgress() {
+        let totalExercisesInMonth = 0;
+        let completedExercisesInMonth = 0;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const routineKey = monthlySchedule[d];
+            if (routineKey !== 'REST') {
+                totalExercisesInMonth += routines[routineKey].details.exercises.length;
+                
+                const progressKey = `${year}-${month + 1}-${d}`;
+                const savedProgress = JSON.parse(localStorage.getItem(progressKey));
+                if (savedProgress) {
+                    completedExercisesInMonth += savedProgress.filter(Boolean).length;
+                }
+            }
+        }
+
+        const globalPercentage = totalExercisesInMonth > 0 ? Math.round((completedExercisesInMonth / totalExercisesInMonth) * 100) : 0;
+        
+        const globalProgressBar = document.getElementById('global-progress-bar');
+        const globalProgressText = document.getElementById('global-progress-text');
+
+        if (globalProgressBar) globalProgressBar.style.width = `${globalPercentage}%`;
+        if (globalProgressText) globalProgressText.textContent = `${globalPercentage}% Completado`;
+    }
+
+    function generateCalendar() {
+        calendarTitle.textContent = `Plan de ${today.toLocaleDateString('es-ES', { month: 'long' })} ${year}`;
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const offset = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1;
+
+        calendarBody.innerHTML = '';
+        for (let i = 0; i < offset; i++) {
+            calendarBody.innerHTML += `<div class="bg-stone-50 rounded-md"></div>`;
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const activityKey = monthlySchedule[d];
+            const activity = routines[activityKey];
+            const isToday = d === day;
+            const todayClass = isToday ? 'today' : '';
+
+            let dayCell = `
+                <div class="calendar-day bg-white p-2 rounded-md border border-stone-200 flex flex-col ${todayClass}">
+                    <div class="font-bold text-sm">${d}</div>
+                    <div class="text-xs mt-1 flex-grow">
+                        <p class="font-semibold text-[#2c3144]">${activity.title}</p>
+                        <p class="text-stone-500 hidden sm:block">${activity.description}</p>
+                    </div>
+                </div>`;
+            calendarBody.innerHTML += dayCell;
+        }
+    }
+
+    function switchTab(tabName) {
+        contentSections.forEach(section => section.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+
+        tabs.forEach(tab => {
+            tab.classList.remove('tab-active');
+            if (tab.dataset.tab === tabName) {
+                tab.classList.add('tab-active');
+            }
+        });
+    }
+
+    function initModal() {
+        const modal = document.getElementById('guide-modal');
+        const guideContent = document.getElementById('guide-content');
+        const closeBtn = document.getElementById('close-guide-btn');
+        
+        guideContent.innerHTML = legGuideContent;
+
+        mainContent.addEventListener('click', (e) => {
+            if (e.target.id === 'show-guide-btn') {
+                modal.classList.remove('hidden');
+            }
+        });
+
+        closeBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) { // Clicked on the overlay
+                modal.classList.add('hidden');
+            }
+        });
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+    routineSelectors.forEach(button => {
+        button.addEventListener('click', () => {
+            routineDetailsContainer.innerHTML = createRoutineHTML(button.dataset.routine, false);
+            if (window.innerWidth < 640) {
+                routineDetailsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+    
+    document.querySelectorAll('.accordion-toggle').forEach(button => {
+        button.addEventListener('click', () => {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('span:last-child');
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                document.querySelectorAll('.accordion-content').forEach(el => {
+                    el.style.maxHeight = null;
+                    if (el.previousElementSibling) {
+                       el.previousElementSibling.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+                    }
+                });
+                content.style.maxHeight = content.scrollHeight + "px";
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+    });
+    
+    hoyContainer.addEventListener('change', (e) => {
+        if (e.target.matches('input[type="checkbox"]')) {
+            saveProgress();
+            updateProgress();
+            updateGlobalProgress();
+        }
+    });
+
+    // Initial Load
+    displayTodaysPlan();
+    generateCalendar();
+    updateGlobalProgress();
+    initModal();
+    switchTab('hoy');
+    routineDetailsContainer.innerHTML = createRoutineHTML('PUSH', false);
+});
+</script>
+
+</body>
+</html>
